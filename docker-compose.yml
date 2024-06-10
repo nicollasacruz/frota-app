@@ -1,0 +1,85 @@
+services:
+  frota_web:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./volumes/frota-app:/var/www/html:rw
+    container_name: frota_web
+    environment:
+      - VIRTUAL_HOST=frotaalcantara.pt
+      - LETSENCRYPT_HOST=frotaalcantara.pt
+      - LETSENCRYPT_EMAIL=nicollasacruz@gmail.com
+      - VIRTUAL_PORT=8080
+    depends_on:
+      - php_frota
+    networks:
+      - rede_frota
+      - reverse-proxy
+
+  php_frota:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./volumes/frota-app:/var/www/html:rw
+    networks:
+      - rede_frota
+
+  db_frota:
+    image: mariadb:latest
+    environment:
+      - TZ=${TZ:-America/Sao_Paulo}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-dino}
+      - MYSQL_USER=${MYSQL_USER:-dino}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-dino}
+    volumes:
+      - ./.docker/config/mysql:/etc/mysql/conf.d
+      - ./volumes/mysql/data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - rede_frota
+      - database
+ 
+  redis_frota:
+    image: redis:latest
+    restart: unless-stopped
+    networks:
+      - rede_frota
+
+  memcached:
+    image: memcached:latest
+    restart: unless-stopped
+    networks:
+      - rede_frota  
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - VIRTUAL_HOST=database.frotaalcantara.pt
+      - LETSENCRYPT_HOST=database.frotaalcantara.pt
+      - LETSENCRYPT_EMAIL=nicollasacruz@gmail.com
+      - VIRTUAL_PORT=9001
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db_frota
+      - PMA_PORT=3306
+    ports:
+      - "9001:80"
+    restart: unless-stopped
+    depends_on:
+      - db_frota
+    networks:
+      - rede_frota
+      - reverse-proxy
+
+networks:
+  rede_frota:
+    external: true
+  reverse-proxy:
+    external: true
+    name: reverse-proxy
+  database:
+    external: true

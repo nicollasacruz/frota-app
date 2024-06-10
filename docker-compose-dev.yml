@@ -1,0 +1,77 @@
+services:
+  webservice:
+    build:
+      context: ./nginx
+      dockerfile: DevDockerfile
+    restart: unless-stopped
+    volumes:
+      - ./volumes/frota-app:/var/www/html
+    container_name: webservice
+    ports:
+      - "8080:8080"
+    depends_on:
+      - php
+    networks:
+      - minha_rede
+
+  php:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      XDEBUG_MODE: debug
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    volumes:
+      - ./volumes/frota-app:/var/www/html
+    networks:
+      - minha_rede
+
+  db:
+    image: mariadb:latest
+    environment:
+      - TZ=${TZ:-America/Sao_Paulo}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-frota-app}
+      - MYSQL_USER=${MYSQL_USER:-frota}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-frota}
+    volumes:
+      - ./.docker/config/mysql:/etc/mysql/conf.d
+      - ./volumes/mysql/data:/var/lib/mysql
+      - ./volumes/mysql/dump:/dump
+    restart: unless-stopped
+    networks:
+      - minha_rede
+
+  mailhog:
+    image: blueimp/mailhog
+    ports:
+      - 8025:8025
+      - 1025:1025
+    networks:
+      - minha_rede
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    networks:
+      - minha_rede
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "9000:80"
+    depends_on:
+      - db
+    networks:
+      - minha_rede
+
+networks:
+  minha_rede:
+    external: true
