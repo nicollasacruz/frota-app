@@ -14,7 +14,6 @@ import 'vue3-toastify/dist/index.css';
 const page = usePage()
 
 const showingNavigationDropdown = ref(false);
-console.log(page.props.auth.user, 'user');
 watch(page.props.flash.success, () => {
 
     if (page.props.flash.success) {
@@ -24,8 +23,7 @@ watch(page.props.flash.success, () => {
 
 const isAdmin = () => {
     page.props.auth.user.roles.forEach((role) => {
-        console.log(role)
-        if (role === 'admin') {
+        if (role == 'admin') {
             console.log('admin');
             return true;
         }
