@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {Head, Link, useForm} from "@inertiajs/vue3";

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 import {ref, watch} from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';

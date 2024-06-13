@@ -1,26 +1,30 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, defineProps, defineExpose } from 'vue';
 
-const model = defineModel<string>({ required: true });
+interface Item {
+    id: string | number;
+    name: string;
+}
 
+// Define os tipos das propriedades
+const props = defineProps<{
+    data: Item[];
+}>();
+
+const model = ref<string | number | null>(null); // Define o tipo para o v-model
 const input = ref<HTMLInputElement | null>(null);
-
-defineProps(
-    {
-        data: {
-            type: Array,
-            required: true,
-        },
-    }
-);
 
 onMounted(() => {
     if (input.value?.hasAttribute('autofocus')) {
-        input.value?.focus();
+        input.value.focus();
     }
 });
 
-defineExpose({ focus: () => input.value?.focus() });
+defineExpose({
+    focus: () => {
+        input.value?.focus();
+    }
+});
 </script>
 
 <template>
@@ -30,7 +34,6 @@ defineExpose({ focus: () => input.value?.focus() });
         ref="input"
     >
         <option value="" selected>Selecione</option>
-        <option v-for="item in data" :value="item.id">{{ item.name }}</option>
+        <option v-for="item in data" :key="item.id" :value="item.id">{{ item.name }}</option>
     </select>
-
 </template>

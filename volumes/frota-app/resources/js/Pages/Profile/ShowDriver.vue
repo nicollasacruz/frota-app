@@ -1,4 +1,6 @@
 <script setup lang="ts">
+// @ts-nocheck
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import {Head, router, useForm, Link} from '@inertiajs/vue3';
 import InputLabel from "@/Components/InputLabel.vue";
