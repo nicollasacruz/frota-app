@@ -24,6 +24,7 @@ watch(page.props.flash.success, () => {
 
 const isAdmin = () => {
     page.props.auth.user.roles.forEach((role) => {
+        console.log(role)
         if (role === 'admin') {
             console.log('admin');
             return true;
