@@ -16,6 +16,7 @@ const form = useForm({
     name: user.name,
     email: user.email,
     IBAN: user.IBAN,
+    NIF: user.NIF,
 });
 </script>
 
@@ -51,14 +52,29 @@ const form = useForm({
 
                 <TextInput
                     id="IBAN"
-                    type="IBAN"
+                    type="text"
                     class="mt-1 block w-full"
                     v-model="form.IBAN"
                     required
-                    autocomplete="username"
+                    autocomplete="IBAN"
                 />
 
                 <InputError class="mt-2" :message="form.errors.IBAN" />
+            </div>
+
+            <div>
+                <InputLabel for="NIF" value="NIF" />
+
+                <TextInput
+                    id="NIF"
+                    type="text"
+                    class="mt-1 block w-full"
+                    v-model="form.NIF"
+                    required
+                    autocomplete="NIF"
+                />
+
+                <InputError class="mt-2" :message="form.errors.NIF" />
             </div>
 
             <div>
