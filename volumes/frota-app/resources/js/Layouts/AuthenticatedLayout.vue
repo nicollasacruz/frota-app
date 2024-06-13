@@ -14,13 +14,21 @@ import 'vue3-toastify/dist/index.css';
 const page = usePage()
 
 const showingNavigationDropdown = ref(false);
-
+console.log(page.props.auth.user, 'user');
 watch(page.props.flash.success, () => {
-    console.log(page.props.auth.user);
+
     if (page.props.flash.success) {
         toast.success(page.props.flash.success);
     }
 });
+
+const isAdmin = () => {
+    page.props.auth.user.roles.forEach((role) => {
+        if (role.name === 'admin') {
+            return true;
+        }
+    });
+}
 
 </script>
 
@@ -48,6 +56,7 @@ watch(page.props.flash.success, () => {
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
+                                                v-show="isAdmin"
                                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-900 bg-white dark:bg-gray-100 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150"
                                             >
                                                 Criar
@@ -75,7 +84,7 @@ watch(page.props.flash.success, () => {
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
-                                <NavLink :href="route('usuarios.index')" :active="route().current('usuarios.index')">
+                                <NavLink v-show="isAdmin" :href="route('usuarios.index')" :active="route().current('usuarios.index')">
                                     Listas Motoristas
                                 </NavLink>
                                 <NavLink :href="route('pagamentos.index')" :active="route().current('pagamentos.index')">
@@ -164,11 +173,17 @@ watch(page.props.flash.success, () => {
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('usuarios.create')" :active="route().current('usuarios.create')">
+                        <ResponsiveNavLink v-show="isAdmin" :href="route('usuarios.create')" :active="route().current('usuarios.create')">
                             Criar Usuário
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink :href="route('pagamentos.create')" :active="route().current('pagamentos.create')">
+                        <ResponsiveNavLink v-show="isAdmin" :href="route('pagamentos.create')" :active="route().current('pagamentos.create')">
                             Criar Pagamento
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink v-show="isAdmin" :href="route('usuarios.index')" :active="route().current('usuarios.index')">
+                            Listar Motoristas
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('pagamentos.index')" :active="route().current('pagamentos.index')">
+                            Listar Pagamentos
                         </ResponsiveNavLink>
                     </div>
 
