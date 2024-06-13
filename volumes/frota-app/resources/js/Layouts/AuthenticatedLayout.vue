@@ -58,7 +58,7 @@ const isAdmin = () => {
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                v-show="isAdmin"
+                                                v-show="isAdmin()"
                                                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-900 bg-white dark:bg-gray-100 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150"
                                             >
                                                 Criar
@@ -86,7 +86,7 @@ const isAdmin = () => {
                                 <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                                     Dashboard
                                 </NavLink>
-                                <NavLink v-show="isAdmin" :href="route('usuarios.index')" :active="route().current('usuarios.index')">
+                                <NavLink v-show="isAdmin()" :href="route('usuarios.index')" :active="route().current('usuarios.index')">
                                     Listas Motoristas
                                 </NavLink>
                                 <NavLink :href="route('pagamentos.index')" :active="route().current('pagamentos.index')">
@@ -175,13 +175,13 @@ const isAdmin = () => {
                         <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             Dashboard
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink v-show="isAdmin" :href="route('usuarios.create')" :active="route().current('usuarios.create')">
+                        <ResponsiveNavLink v-show="isAdmin()" :href="route('usuarios.create')" :active="route().current('usuarios.create')">
                             Criar Usuário
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink v-show="isAdmin" :href="route('pagamentos.create')" :active="route().current('pagamentos.create')">
+                        <ResponsiveNavLink v-show="isAdmin()" :href="route('pagamentos.create')" :active="route().current('pagamentos.create')">
                             Criar Pagamento
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink v-show="isAdmin" :href="route('usuarios.index')" :active="route().current('usuarios.index')">
+                        <ResponsiveNavLink v-show="isAdmin()" :href="route('usuarios.index')" :active="route().current('usuarios.index')">
                             Listar Motoristas
                         </ResponsiveNavLink>
                         <ResponsiveNavLink :href="route('pagamentos.index')" :active="route().current('pagamentos.index')">
