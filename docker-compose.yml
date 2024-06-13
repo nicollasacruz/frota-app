@@ -8,8 +8,8 @@ services:
       - ./volumes/frota-app:/var/www/html:rw
     container_name: frota_web
     environment:
-      - VIRTUAL_HOST=frotaalcantara.pt
-      - LETSENCRYPT_HOST=frotaalcantara.pt
+      - VIRTUAL_HOST=frotasalcantara.pt
+      - LETSENCRYPT_HOST=frotasalcantara.pt
       - LETSENCRYPT_EMAIL=nicollasacruz@gmail.com
       - VIRTUAL_PORT=8080
     depends_on:
@@ -33,9 +33,9 @@ services:
     environment:
       - TZ=${TZ:-America/Sao_Paulo}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-dino}
-      - MYSQL_USER=${MYSQL_USER:-dino}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-dino}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-frota-app}
+      - MYSQL_USER=${MYSQL_USER:-frota}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-frota}
     volumes:
       - ./.docker/config/mysql:/etc/mysql/conf.d
       - ./volumes/mysql/data:/var/lib/mysql
