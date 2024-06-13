@@ -15,6 +15,7 @@ class UserController extends Controller
         $userLogged = User::find(auth()->user()->id);
         if ($userLogged->hasRole('admin')) {
             $users = User::all();
+
             return inertia('User/Index', [
                 'users' => $users,
             ]);
@@ -51,8 +52,10 @@ class UserController extends Controller
             $user->fill($request->all());
             $user->password = bcrypt($request->password);
             $user->save();
+
             return redirect()->route('user.index');
         }
+
         return redirect()->route('index');
     }
 
@@ -67,6 +70,7 @@ class UserController extends Controller
                 'user' => $user,
             ]);
         }
+
         return redirect()->route('index');
     }
 
@@ -81,6 +85,7 @@ class UserController extends Controller
                 'user' => $user,
             ]);
         }
+
         return redirect()->route('index');
     }
 
@@ -117,6 +122,7 @@ class UserController extends Controller
         if ($userLogged->hasRole('admin')) {
 
             $user->delete();
+
             return redirect()->route('users.index');
         }
     }

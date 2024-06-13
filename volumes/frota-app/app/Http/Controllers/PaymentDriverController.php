@@ -8,87 +8,85 @@ use App\Models\Settings;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Inertia\Response;
 
 class PaymentDriverController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $payments = PaymentDriver::all();
+        $this->authorize('viewAny', PaymentDriver::class);
+
+        $user = $request->user();
+
+        if ($user->isAdmin) {
+            $payments = PaymentDriver::all();
+        } else {
+            $payments = $user->paymentsDriver;
+        }
 
         return inertia('PaymentDriver/ListPaymentsDriver', [
             'payments' => $payments->load('user'),
         ]);
     }
-
-    public function create()
+    public function create(Request $request)
     {
-        $user = User::find(Auth::id());
+        $this->authorize('create', PaymentDriver::class);
 
-        if ($user->isAdmin()) {
+        $drivers = User::whereJsonContains('roles', 'driver')->get();
 
-            $drivers = User::whereJsonContains('roles', 'driver')->get();
-
-            if ($drivers->isEmpty()) {
-                return redirect()->route('usuarios.create')->with('error', 'Não existem motoristas para pagar.');
-            }
-
-            return inertia('PaymentDriver/Create', [
-                'drivers' => $drivers,
-                'cars' => Car::all()
-            ]);
+        if ($drivers->isEmpty()) {
+            return redirect()->route('usuarios.create')->with('error', 'Não existem motoristas para pagar.');
         }
 
-        return redirect()->route('dashboard');
+        return inertia('PaymentDriver/Create', [
+            'drivers' => $drivers,
+            'cars' => Car::all(),
+        ]);
     }
-
 
     public function store(Request $request)
     {
+        $this->authorize('create', PaymentDriver::class);
         $user = User::find(Auth::user()->id);
-        if ($user->isAdmin()) {
-            $request->validate([
-                'date' => 'required|date|before_or_equal:today',
-                'user_id' => 'required|exists:users,id',
-                'valueWeek' => 'required|numeric',
-                'paymentMethod' => 'required|in:IBAN,MONEY,MB-WAY',
-                'platform' => 'required|in:uber,bolt',
-                'slotValue' => 'numeric',
-                'viaVerdeValue' => 'numeric',
-                'frotaCardValue' => 'numeric|min:0',
-            ]);
+        $request->validate([
+            'date' => 'required|date|before_or_equal:today|unique:payment_drivers,date,NULL,id,user_id,' . $request->user()->id,
+            'user_id' => 'required|exists:users,id',
+            'valueWeekUber' => 'required|numeric',
+            'valueWeekBolt' => 'required|numeric',
+            'paymentMethod' => 'required|in:IBAN,MONEY,MB-WAY',
+            'slotValue' => 'numeric',
+            'viaVerdeValue' => 'numeric',
+            'frotaCardValue' => 'numeric|min:0',
+        ]);
 
-            $driver = User::find($request->user_id);
-            $settings = Settings::first();
+        $driver = User::find($request->user_id);
+        $settings = Settings::first();
 
-            $value = $request->valueWeek * $user->profitPercentage / 100;
-            $paymentDriver = new PaymentDriver();
+        $value = ($request->valueWeekUber + $request->valueWeekBolt) * $user->profitPercentage / 100;
+        $paymentDriver = new PaymentDriver();
 
-            $paymentDriver->date = $request->date;
-            $paymentDriver->user_id = $request->user_id;
-            $paymentDriver->valueWeek = $value;
-            $paymentDriver->slotValue = $request->slotValue;
-            $paymentDriver->viaVerdeValue = $request->viaVerdeValue;
-            $paymentDriver->taxPercentage = $settings->percentageTaxIVA / 100;
-            $paymentDriver->taxValue = $value * $settings->percentageTaxIVA / 100;
-            $paymentDriver->profitPercentage = $driver->profitPercentage;
-            $paymentDriver->hasCar = $driver->hasCar;
-            $paymentDriver->rentValue = !$driver->hasCar ? $driver->rentValue : 0;
-            $paymentDriver->totalValue = $value - $paymentDriver->taxValue - $paymentDriver->rentValue;
-            $paymentDriver->paymentMethod = $request->paymentMethod;
-            $paymentDriver->platform = $request->platform;
-            $paymentDriver->frotaCardValue = $request->frotaCardValue;
+        $paymentDriver->date = $request->date;
+        $paymentDriver->user_id = $request->user_id;
+        $paymentDriver->valueWeekUber = $request->valueWeekUber * $user->profitPercentage / 100;
+        $paymentDriver->valueWeekBolt = $request->valueWeekBolt * $user->profitPercentage / 100;
+        $paymentDriver->slotValue = $request->slotValue;
+        $paymentDriver->viaVerdeValue = $request->viaVerdeValue;
+        $paymentDriver->taxPercentage = $settings->percentageTaxIVA;
+        $paymentDriver->taxValue = $value * $settings->percentageTaxIVA / 100;
+        $paymentDriver->profitPercentage = $driver->profitPercentage;
+        $paymentDriver->hasCar = $driver->hasCar;
+        $paymentDriver->rentValue = ! $driver->hasCar ? $driver->rentValue : 0;
+        $paymentDriver->paymentMethod = $request->paymentMethod;
+        $paymentDriver->frotaCardValue = $request->frotaCardValue;
+        $paymentDriver->save();
 
-            $paymentDriver->save();
-
-            return redirect()->route('dashboard')->with('success', 'Pagamento criado.');
-        }
-        return redirect()->route('dashboard');
+        return redirect()->route('pagamentos.index')->with('success', 'Pagamento criado.');
     }
 
     public function show(PaymentDriver $payment)
     {
+        $this->authorize('view', $payment);
+
         $drivers = User::whereJsonContains('roles', 'driver')->get();
 
         if ($drivers->isEmpty()) {
@@ -98,64 +96,56 @@ class PaymentDriverController extends Controller
         return inertia('PaymentDriver/Show', [
             'payment' => $payment->load('user'),
             'drivers' => $drivers,
-            'cars' => Car::all()
+            'cars' => Car::all(),
         ]);
     }
 
-    public function edit(PaymentDriver $paymentDriver)
+    public function edit(PaymentDriver $payment)
     {
-        $user = User::find(Auth::user()->id);
-        if ($user->isAdmin()) {
-            return inertia('PaymentDriver/Edit', [
-                'paymentDriver' => $paymentDriver->load('user')
-            ]);
-        }
-        return redirect()->route('dashboard');
+        $this->authorize('update', $payment);
+
+        return inertia('PaymentDriver/Edit', [
+            'paymentDriver' => $payment->load('user'),
+        ]);
+
     }
 
-    public function update(Request $request, PaymentDriver $paymentDriver)
+    public function update(Request $request, PaymentDriver $payment)
     {
-        $user = User::find(Auth::user()->id);
-        if ($user->isAdmin()) {
-            $request->validate([
-                'date' => 'required|date|before_or_equal:today',
-                'valueWeek' => 'required|numeric',
-                'taxPercentage' => 'required|numeric|min:0|max:100',
-                'profitPercentage' => 'required|numeric|min:1|max:100',
-                'hasCar' => 'required|boolean',
-                'rentValue' => 'numeric|min:0',
-                'paymentMethod' => 'required|in:IBAN,MONEY,MB-WAY',
-                'paymentStatus' => 'required|in:PENDING,PAID',
-            ]);
 
-            $value = $request->valueWeek * $request->profitPercentage / 100;
+        $request->validate([
+            'date' => 'required|date|before_or_equal:today',
+            'valueWeekUber' => 'required|numeric',
+            'taxPercentage' => 'required|numeric|min:0|max:100',
+            'profitPercentage' => 'required|numeric|min:1|max:100',
+            'hasCar' => 'required|boolean',
+            'rentValue' => 'numeric|min:0',
+            'paymentMethod' => 'required|in:IBAN,MONEY,MB-WAY',
+            'paymentStatus' => 'required|in:PENDING,PAID',
+        ]);
 
-            $paymentDriver->date = $request->date;
-            $paymentDriver->valueWeek = $value;
-            $paymentDriver->taxValue = $value * ($request->taxPercentage ? $request->taxPercentage / 100 : 1);
-            $paymentDriver->profitPercentage = $request->profitPercentage;
-            $paymentDriver->hasCar = $request->hasCar;
-            $paymentDriver->rentValue = $request->rentValue;
-            $paymentDriver->totalValue = $value - $paymentDriver->taxValue - $paymentDriver->rentValue;
-            $paymentDriver->paymentMethod = $request->paymentMethod;
-            $paymentDriver->paymentStatus = $request->paymentStatus;
+        $payment->date = $request->date;
+        $payment->valueWeekUber = $request->valueWeekUber * $request->profitPercentage / 100;
+        $payment->valueWeekBolt = $request->valueWeekBolt * $request->profitPercentage / 100;
+        $payment->taxPercentage = $request->taxPercentage;
+        $payment->profitPercentage = $request->profitPercentage;
+        $payment->hasCar = $request->hasCar;
+        $payment->rentValue = $request->rentValue;
+        $payment->paymentMethod = $request->paymentMethod;
+        $payment->paymentStatus = $request->paymentStatus;
+        $payment->frotaCardValue = $request->frotaCardValue;
+        $payment->slotValue = $request->slotValue;
 
+        $payment->save();
 
-            $paymentDriver->save();
-
-            return redirect()->route('paymentDrivers.index')->with('success', 'Pagamento atualizado.');
-        }
-        return redirect()->route('dashboard');
+        return redirect()->route('pagamentos.index')->with('success', 'Pagamento atualizado.');
     }
 
-    public function destroy(PaymentDriver $paymentDriver)
+    public function destroy(PaymentDriver $payment)
     {
-        $user = User::find(Auth::user()->id);
-        if ($user->isAdmin()) {
-            $paymentDriver->delete();
+        $this->authorize('delete', $payment);
+        $payment->delete();
 
-            return redirect()->route('paymentDrivers.index')->with('success', 'Pagamento eliminado.');
-        }
-        return redirect()->route('dashboard');
+        return redirect()->route('pagamentos.index')->with('success', 'Pagamento eliminado.');
     }
 }

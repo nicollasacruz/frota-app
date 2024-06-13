@@ -16,10 +16,10 @@ const props = defineProps<{
 
 const form = useForm({
     date: new Date().toISOString().split('T')[0],
-    valueWeek: '0',
+    valueWeekUber: '0',
+    valueWeekBolt: '0',
     user_id: "",
     paymentMethod: "IBAN",
-    platform: "uber",
     car_id: null,
     slotValue: '0',
     viaVerdeValue: '0',
@@ -32,11 +32,6 @@ const paymentMethods = [
     {id: 'MB-WAY', name: 'Mb-Way'},
 ];
 
-const platformSelect = [
-    {id: 'uber', name: 'Uber'},
-    {id: 'bolt', name: 'Bolt'},
-];
-
 const carsSelect = [
 ];
 props.cars.forEach((car: any) => {
@@ -45,7 +40,7 @@ props.cars.forEach((car: any) => {
 
 function validateCurrency(event: Event) {
     const input = event.target as HTMLInputElement;
-    let value = input.valueWeek;
+    let value = input.valueWeekUber;
 
     // Allow only digits and comma
     value = value.replace(/[^0-9,]/g, '');
@@ -62,7 +57,29 @@ function validateCurrency(event: Event) {
     }
 
     input.value = value;
-    form.valueWeek = value;
+    form.valueWeekUber = value;
+}
+
+function validateCurrencyBolt(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value = input.valueWeekBolt;
+
+    // Allow only digits and comma
+    value = value.replace(/[^0-9,]/g, '');
+
+    // Ensure there's only one comma
+    const parts = value.split(',');
+    if (parts.length > 2) {
+        value = parts[0] + ',' + parts.slice(1).join('');
+    }
+
+    // Ensure only two digits after the comma
+    if (parts[1]?.length > 2) {
+        value = parts[0] + ',' + parts[1].slice(0, 2);
+    }
+
+    input.value = value;
+    form.valueWeekBolt = value;
 }
 
 function validateCurrencySlot(event: Event) {
@@ -109,6 +126,28 @@ function validateCurrencyViaVerde(event: Event) {
     form.viaVerdeValue = value;
 }
 
+function validateCurrencyPortagem(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+
+    // Allow only digits and comma
+    value = value.replace(/[^0-9,]/g, '');
+
+    // Ensure there's only one comma
+    const parts = value.split(',');
+    if (parts.length > 2) {
+        value = parts[0] + ',' + parts.slice(1).join('');
+    }
+
+    // Ensure only two digits after the comma
+    if (parts[1]?.length > 2) {
+        value = parts[0] + ',' + parts[1].slice(0, 2);
+    }
+
+    input.value = value;
+    form.viaVerdeValue = value;
+}
+
 function validateCurrencyfrotaCardValue(event: Event) {
     const input = event.target as HTMLInputElement;
     let value = input.value;
@@ -133,7 +172,8 @@ function validateCurrencyfrotaCardValue(event: Event) {
 
 watch(() => form.wasSuccessful, (newValue) => {
     if (newValue) {
-        form.valueWeek = parseFloat(form.valueWeek.replace(',', '.')).toFixed(2);
+        form.valueWeekUber = parseFloat(form.valueWeekUber.replace(',', '.')).toFixed(2);
+        form.valueWeekBolt = parseFloat(form.valueWeekBolt.replace(',', '.')).toFixed(2);
         form.slotValue = parseFloat(form.slotValue.replace(',', '.')).toFixed(2);
         form.viaVerdeValue = parseFloat(form.viaVerdeValue.replace(',', '.')).toFixed(2);
     }
@@ -148,8 +188,8 @@ watch(() => form.user_id, (newValue) => {
     }
 });
 
-watch([() => form.valueWeek, () => form.date, () => form.user_id, () => form.paymentMethod], () => {
-    if (form.valueWeek && form.date && form.user_id && form.paymentMethod && form.platform) {
+watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form.paymentMethod], () => {
+    if (form.valueWeekUber && form.date && form.user_id && form.paymentMethod) {
         form.wasSuccessful = true;
         console.log('entrou no sucesso');
     }
@@ -176,37 +216,38 @@ watch([() => form.valueWeek, () => form.date, () => form.user_id, () => form.pay
                 </header>
 
                 <form @submit.prevent="form.post(route('pagamentos.store'))" class="mt-6 space-y-6">
-                    <div id="platformForm">
-                        <InputLabel for="platform" value="Plataforma"/>
-
-                        <SelectInput
-                            :data="platformSelect"
-                            id="platform"
-                            class="mt-1 block w-full"
-                            v-model="form.platform"
-                            required
-                            autofocus
-                            autocomplete="platform"
-                        />
-
-                        <InputError class="mt-2" :message="form.errors.platform"/>
-                    </div>
-
                     <div id="valueForm">
-                        <InputLabel for="valueWeek" value="Valor"/>
+                        <InputLabel for="valueWeekUber" value="Valor Uber"/>
 
                         <TextInput
-                            id="valueWeek"
+                            id="valueWeekUber"
                             type="text"
                             class="mt-1 block w-full"
-                            v-model="form.valueWeek"
+                            v-model="form.valueWeekUber"
                             required
                             autofocus
                             @input="validateCurrency"
-                            autocomplete="valueWeek"
+                            autocomplete="valueWeekUber"
                         />
 
-                        <InputError class="mt-2" :message="form.errors.valueWeek"/>
+                        <InputError class="mt-2" :message="form.errors.valueWeekUber"/>
+                    </div>
+
+                    <div id="valueForm">
+                        <InputLabel for="valueWeekBolt" value="Valor Bolt"/>
+
+                        <TextInput
+                            id="valueWeekUber"
+                            type="text"
+                            class="mt-1 block w-full"
+                            v-model="form.valueWeekBolt"
+                            required
+                            autofocus
+                            @input="validateCurrencyBolt"
+                            autocomplete="valueWeekUber"
+                        />
+
+                        <InputError class="mt-2" :message="form.errors.valueWeekBolt"/>
                     </div>
 
                     <div>

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('description');
             $table->float('amount');
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('payment_driver_id')->nullable()->constrained();
+            $table->foreignId('payment_driver_id')->nullable()->constrained()->nullOnDelete();
             $table->date('payment_date')->default(now());
             $table->date('refund_date')->nullable();
             $table->integer('ivaPercentage');

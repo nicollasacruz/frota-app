@@ -10,17 +10,17 @@ import { ref, watch } from "vue";
 const props = defineProps<{
     drivers: { id: number; name: string; email: string; hasCar: boolean; }[];
     cars: { id: number; model: string; }[];
-    payment: { id: number; date: string; valueWeek: string; user_id: string; paymentMethod: string; platform: string; car_id: number; slotValue: number; viaVerdeValue: number; frotaCardValue: number; refund_iva_amount: string; totalValue: string; };
+    payment: { id: number; date: string; valueWeekUber: number; valueWeekBolt: number; user_id: string; paymentMethod: string; car_id: number; slotValue: number; viaVerdeValue: number; frotaCardValue: number; refund_iva_amount: number; totalValue: number; };
 }>();
 
 props.payment.date = props.payment.date.split('T')[0];
 console.log(props.payment);
 const form = useForm({
     date: props.payment.date,
-    valueWeek: props.payment.valueWeek,
+    valueWeekUber: props.payment.valueWeekUber,
+    valueWeekBolt: props.payment.valueWeekBolt,
     user_id: props.payment.user_id,
     paymentMethod: props.payment.paymentMethod,
-    platform: props.payment.platform,
     car_id: props.payment.car_id,
     slotValue: props.payment.slotValue,
     viaVerdeValue: props.payment.viaVerdeValue,
@@ -33,11 +33,6 @@ const paymentMethods = [
     {id: 'IBAN', name: 'IBAN'},
     {id: 'MONEY', name: 'Dinheiro'},
     {id: 'MB-WAY', name: 'Mb-Way'},
-];
-
-const platformSelect = [
-    {id: 'uber', name: 'Uber'},
-    {id: 'bolt', name: 'Bolt'},
 ];
 
 const carsSelect = [
@@ -55,8 +50,8 @@ watch(() => form.user_id, (newValue) => {
     }
 });
 
-watch([() => form.valueWeek, () => form.date, () => form.user_id, () => form.paymentMethod], () => {
-    if (form.valueWeek && form.date && form.user_id && form.paymentMethod && form.platform) {
+watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form.paymentMethod], () => {
+    if (form.valueWeekUber && form.date && form.user_id && form.paymentMethod) {
         form.wasSuccessful = true;
         console.log('entrou no sucesso');
     }
@@ -82,33 +77,33 @@ watch([() => form.valueWeek, () => form.date, () => form.user_id, () => form.pay
                 </header>
 
                 <form class="mt-6 space-y-6">
-                    <div id="platformForm">
-                        <InputLabel for="platform" value="Plataforma"/>
+                    <div id="valueForm">
+                        <InputLabel for="valueWeekUber" value="Valor Uber"/>
 
-                        <SelectInput
-                            :data="platformSelect"
-                            id="platform"
+                        <TextInput
+                            id="valueWeekUber"
+                            type="text"
                             class="mt-1 block w-full"
-                            v-model="form.platform"
+                            v-model="form.valueWeekUber"
                             required
                             autofocus
                             disabled
-                            autocomplete="platform"
+                            autocomplete="valueWeekUber"
                         />
                     </div>
 
                     <div id="valueForm">
-                        <InputLabel for="valueWeek" value="Valor"/>
+                        <InputLabel for="valueWeekBolt" value="Valor Bolt"/>
 
                         <TextInput
-                            id="valueWeek"
+                            id="valueWeekBolt"
                             type="text"
                             class="mt-1 block w-full"
-                            v-model="form.valueWeek"
+                            v-model="form.valueWeekBolt"
                             required
                             autofocus
                             disabled
-                            autocomplete="valueWeek"
+                            autocomplete="valueWeekBolt"
                         />
                     </div>
 

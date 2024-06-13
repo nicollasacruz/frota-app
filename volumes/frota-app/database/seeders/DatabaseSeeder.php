@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
-            'roles' => ['user', "admin"],
+            'roles' => ['user', 'admin'],
             'password' => bcrypt('senha'),
         ]);
 
@@ -65,17 +65,15 @@ class DatabaseSeeder extends Seeder
             'date' => fake()->date,
             'user_id' => $driver->id,
             'car_id' => Car::factory()->create()->id,
-            'platform' => 'uber',
-            'valueWeek' => $value,
+            'valueWeekUber' => $value,
+            'valueWeekBolt' => $value / 2,
             'taxPercentage' => 6,
-            'taxValue' => $value * 0.06,
             'profitPercentage' => 100,
             'hasCar' => $driver->hasCar,
             'rentValue' => $driver->rentValue,
             'paymentMethod' => 'IBAN',
             'slotValue' => 0,
             'viaVerdeValue' => 20,
-            'totalValue' => $value - ($value * 0.06) - $driver->rentValue - 20,
         ]);
 
         $payment1->closePayment();
@@ -85,17 +83,16 @@ class DatabaseSeeder extends Seeder
             'date' => fake()->date,
             'user_id' => $driver2->id,
             'car_id' => Car::factory()->create()->id,
-            'platform' => 'uber',
-            'valueWeek' => $value,
+            'valueWeekUber' => 405.88 + 4.9,
+            'valueWeekBolt' => 144.20,
             'taxPercentage' => 6,
-            'taxValue' => $value * 0.06,
             'profitPercentage' => 100,
             'hasCar' => $driver2->hasCar,
             'rentValue' => $driver2->rentValue,
             'paymentMethod' => 'IBAN',
-            'slotValue' => 0,
-            'viaVerdeValue' => 20,
-            'totalValue' => $value - ($value * 0.06) - $driver2->rentValue - 20,
+            'slotValue' => 40,
+            'viaVerdeValue' => 4.9,
+            'frotaCardValue' => 90,
         ]);
 
         $payment2->closePayment();

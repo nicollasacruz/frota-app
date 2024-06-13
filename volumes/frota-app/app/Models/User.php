@@ -58,7 +58,7 @@ class User extends Authenticatable
         'roles' => 'array',
     ];
 
-    public function isAdmin(): bool
+    public function getIsAdminAttribute(): bool
     {
         return in_array('admin', $this->roles);
     }

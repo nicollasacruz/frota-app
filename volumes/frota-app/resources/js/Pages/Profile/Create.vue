@@ -126,6 +126,7 @@ watch(() => form.wasSuccessful, (newValue) => {
                             type="text"
                             class="mt-1 block w-full"
                             v-model="form.phone"
+                            pattern="[0-9]{9}"
                             required
                             autocomplete="phone"
                         />
@@ -156,6 +157,7 @@ watch(() => form.wasSuccessful, (newValue) => {
                             type="text"
                             class="mt-1 block w-full"
                             v-model="form.NIF"
+                            pattern="[0-9]{9}"
                             required
                             autocomplete="NIF"
                         />

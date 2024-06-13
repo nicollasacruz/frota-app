@@ -17,7 +17,7 @@ class ProfileController extends Controller
     /**
      * Display the index profile.
      */
-    public function index(Request $request): Response
+    public function index(): Response
     {
         $drivers = User::whereJsonContains('roles', 'driver')->get();
 
@@ -29,7 +29,7 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function create(Request $request): Response
+    public function create(): Response
     {
         return Inertia::render('Profile/Create');
     }
@@ -45,7 +45,7 @@ class ProfileController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'phone' => ['required', 'string', 'min:9', 'max:13'],
             'IBAN' => ['required', 'string', 'max:255'],
-            'profitPercentage' => ['required', 'numeric', 'min:1' ,'max:100'],
+            'profitPercentage' => ['required', 'numeric', 'min:1', 'max:100'],
             'hasCar' => ['required', 'boolean'],
             'rentValue' => ['numeric'],
         ]);
@@ -56,7 +56,7 @@ class ProfileController extends Controller
 
         User::create($data);
 
-        return Redirect::route('dashboard');
+        return Redirect::route('usuarios.index');
     }
 
     /**
