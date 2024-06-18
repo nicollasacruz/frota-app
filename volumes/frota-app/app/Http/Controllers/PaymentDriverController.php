@@ -94,9 +94,8 @@ class PaymentDriverController extends Controller
         }
 
         return inertia('PaymentDriver/Show', [
-            'payment' => $payment->load('user'),
-            'drivers' => $drivers,
-            'cars' => Car::all(),
+            'payment' => $payment->load(['user', 'car']),
+
         ]);
     }
 
@@ -105,7 +104,9 @@ class PaymentDriverController extends Controller
         $this->authorize('update', $payment);
 
         return inertia('PaymentDriver/Edit', [
-            'paymentDriver' => $payment->load('user'),
+            'cars' => Car::all(),
+            'drivers' => User::whereJsonContains('roles', 'driver')->get(),
+            'payment' => $payment->load(['user', 'car']),
         ]);
 
     }

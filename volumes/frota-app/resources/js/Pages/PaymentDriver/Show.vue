@@ -7,27 +7,28 @@ import TextInput from "@/Components/TextInput.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import SelectInput from "@/Components/SelectInput.vue";
 import { ref, watch } from "vue";
+import InputError from "@/Components/InputError.vue";
+import Checkbox from "@/Components/Checkbox.vue";
 
 const props = defineProps<{
-    drivers: { id: number; name: string; email: string; hasCar: boolean; }[];
-    cars: { id: number; model: string; }[];
-    payment: { id: number; date: string; valueWeekUber: number; valueWeekBolt: number; user_id: string; paymentMethod: string; car_id: number; slotValue: number; viaVerdeValue: number; frotaCardValue: number; refund_iva_amount: number; totalValue: number; };
+    payment: { id: number; date: string; valueWeekUber: number; valueWeekBolt: number; user_id: string; paymentMethod: string; car_id: number; slotValue: number; viaVerdeValue: number; frotaCardValue: number; refund_iva_amount: number; totalValue: number; instantPayment: boolean; user: { id: number; name: string; email: string; }; car: { id: number; license_plate: string; brand: string; model: string; year: number; }};
 }>();
 
 props.payment.date = props.payment.date.split('T')[0];
-console.log(props.payment);
+
 const form = useForm({
     date: props.payment.date,
     valueWeekUber: props.payment.valueWeekUber,
     valueWeekBolt: props.payment.valueWeekBolt,
-    user_id: props.payment.user_id,
     paymentMethod: props.payment.paymentMethod,
-    car_id: props.payment.car_id,
+    car: props.payment.car,
     slotValue: props.payment.slotValue,
     viaVerdeValue: props.payment.viaVerdeValue,
     frotaCardValue: props.payment.frotaCardValue,
     refund_iva_amount: props.payment.refund_iva_amount ?? '0',
     totalValue: props.payment.totalValue ?? '0',
+    instantPayment: props.payment.instantPayment,
+    user: props.payment.user,
 });
 
 const paymentMethods = [
@@ -35,28 +36,6 @@ const paymentMethods = [
     {id: 'MONEY', name: 'Dinheiro'},
     {id: 'MB-WAY', name: 'Mb-Way'},
 ];
-
-const carsSelect = [
-];
-props.cars.forEach((car: any) => {
-    carsSelect.push({id: car.id, name: car.model});
-});
-
-const hasCar = ref(true);
-
-watch(() => form.user_id, (newValue) => {
-    const driver = props.drivers.find(driver => driver.id == newValue);
-    if (driver) {
-        hasCar.value = driver.hasCar;
-    }
-});
-
-watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form.paymentMethod], () => {
-    if (form.valueWeekUber && form.date && form.user_id && form.paymentMethod) {
-        form.wasSuccessful = true;
-        console.log('entrou no sucesso');
-    }
-})
 
 </script>
 
@@ -171,46 +150,48 @@ watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form
                     <div id="driverForm">
                         <InputLabel for="user_id" value="Motorista"/>
 
-                        <SelectInput
+                        <TextInput
                             id="user_id"
                             class="mt-1 block w-full"
-                            v-model="form.user_id"
-                            :data="drivers"
-                            required
+                            v-model="form.user.name"
                             autofocus
                             disabled
-                            autocomplete="user_id"
                         />
                     </div>
 
-                    <div v-if="!hasCar" id="carForm">
+                    <div v-if="!form.car?.id" id="carForm">
                         <InputLabel for="car_id" value="Carro"/>
 
-                        <SelectInput
-                            id="car_id"
+                        <TextInput
+                            id="car"
                             class="mt-1 block w-full"
-                            v-model="form.car_id"
-                            :data="carsSelect"
-                            required
-                            autofocus
+                            v-model="form.car"
                             disabled
-                            autocomplete="car_id"
                         />
                     </div>
 
                     <div>
                         <InputLabel for="paymentMethod" value="Método de Pagamento"/>
 
-                        <SelectInput
+                        <TextInput
                             id="paymentMethod"
                             class="mt-1 block w-full"
                             v-model="form.paymentMethod"
                             :data="paymentMethods"
-                            required
-                            autofocus
                             disabled
-                            autocomplete="paymentMethod"
                         />
+                    </div>
+
+                    <div id="imediateForm">
+                        <InputLabel for="instantPayment" value="Pagamento Imediato"/>
+
+                        <Checkbox
+                            id="instantPayment"
+                            class="mt-1 block"
+                            :checked="form.instantPayment"
+                            disabled
+                        />
+
                     </div>
 
                     <div class="flex items-center gap-4">

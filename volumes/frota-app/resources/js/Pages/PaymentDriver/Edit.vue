@@ -14,20 +14,26 @@ import Checkbox from "@/Components/Checkbox.vue";
 const props = defineProps<{
     drivers: { id: number; name: string, hasCar: boolean }[];
     cars: { id: number; brand: string; model: string; license_plate: string; }[];
+    payment: { id: number; date: string; valueWeekUber: number; valueWeekBolt: number; user_id: string; paymentMethod: string; car_id: number; slotValue: number; viaVerdeValue: number; frotaCardValue: number; refund_iva_amount: number; totalValue: number; instantPayment: boolean; user: { id: number; name: string; email: string; }; car: { id: number; license_plate: string; brand: string; model: string; year: number; }};
 }>();
 
+props.payment.date = props.payment.date.split('T')[0];
+
 const form = useForm({
-    date: new Date().toISOString().split('T')[0],
-    valueWeekUber: '0',
-    valueWeekBolt: '0',
-    user_id: "",
-    paymentMethod: "IBAN",
-    car_id: null,
-    slotValue: '0',
-    viaVerdeValue: '0',
-    frotaCardValue: '0',
-    instantPayment: false,
+    date: props.payment.date,
+    valueWeekUber: props.payment.valueWeekUber,
+    valueWeekBolt: props.payment.valueWeekBolt,
+    paymentMethod: props.payment.paymentMethod,
+    car_id: props.payment.car_id,
+    slotValue: props.payment.slotValue,
+    viaVerdeValue: props.payment.viaVerdeValue,
+    frotaCardValue: props.payment.frotaCardValue,
+    refund_iva_amount: props.payment.refund_iva_amount ?? '0',
+    totalValue: props.payment.totalValue ?? '0',
+    instantPayment: props.payment.instantPayment,
+    user_id: props.payment.user_id,
 });
+
 
 const paymentMethods = [
     {id: 'IBAN', name: 'IBAN'},
@@ -201,7 +207,7 @@ watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form
 </script>
 
 <template>
-    <Head title="Criar Usuário"/>
+    <Head title="Editar Pagamento"/>
 
     <AuthenticatedLayout>
         <template #header>
@@ -210,15 +216,15 @@ watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form
         <section class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <header>
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Criação de Pagamentos de
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">Edição de Pagamento de
                         motorista</h2>
 
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        Criando um pagamento para um motorista da frota.
+                        Editando um pagamento para um motorista da frota.
                     </p>
                 </header>
 
-                <form @submit.prevent="form.post(route('pagamentos.store'))" class="mt-6 space-y-6">
+                <form @submit.prevent="form.patch(route('pagamentos.update', {payment: props.payment.id}))" class="mt-6 space-y-6">
                     <div id="valueForm">
                         <InputLabel for="valueWeekUber" value="Valor Uber"/>
 
@@ -330,7 +336,6 @@ watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form
                             :data="drivers"
                             required
                             autofocus
-                            autocomplete="user_id"
                         />
 
                         <InputError class="mt-2" :message="form.errors.user_id"/>
@@ -346,7 +351,6 @@ watch([() => form.valueWeekUber, () => form.date, () => form.user_id, () => form
                             :data="carsSelect"
                             required
                             autofocus
-                            autocomplete="car_id"
                         />
 
                         <InputError class="mt-2" :message="form.errors.car_id"/>

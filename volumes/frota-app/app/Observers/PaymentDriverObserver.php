@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\PaymentDriver;
+use App\Models\Settings;
 
 class PaymentDriverObserver
 {
@@ -21,6 +22,9 @@ class PaymentDriverObserver
     {
         $paymentDriver->taxValue = ($paymentDriver->valueWeekUber + $paymentDriver->valueWeekBolt) * ($paymentDriver->taxPercentage / 100);
         $paymentDriver->totalValue = $paymentDriver->valueWeekUber + $paymentDriver->valueWeekBolt - $paymentDriver->taxValue - $paymentDriver->rentValue - $paymentDriver->viaVerdeValue - $paymentDriver->slotValue - $paymentDriver->frotaCardValue + $paymentDriver->refund_iva_amount;
+        if ($paymentDriver->instantPayment) {
+            $paymentDriver->totalValue -= Settings::first()->instantPaymentValue;
+        }
     }
 
     /**
@@ -30,6 +34,9 @@ class PaymentDriverObserver
     {
         $paymentDriver->taxValue = ($paymentDriver->valueWeekUber + $paymentDriver->valueWeekBolt) * ($paymentDriver->taxPercentage / 100);
         $paymentDriver->totalValue = $paymentDriver->valueWeekUber + $paymentDriver->valueWeekBolt - $paymentDriver->taxValue - $paymentDriver->rentValue - $paymentDriver->viaVerdeValue - $paymentDriver->slotValue - $paymentDriver->frotaCardValue + $paymentDriver->refund_iva_amount;
+        if ($paymentDriver->instantPayment) {
+            $paymentDriver->totalValue -= Settings::first()->instantPaymentValue;
+        }
     }
 
     /**

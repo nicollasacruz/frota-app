@@ -32,6 +32,7 @@ class PaymentDriver extends Model
         'viaVerdeValue',
         'refund_iva_amount',
         'frotaCardValue',
+        'instantPayment',
     ];
 
     protected $casts = [
@@ -50,6 +51,7 @@ class PaymentDriver extends Model
         'viaVerdeValue' => 'float',
         'refunded_iva_amount' => 'float',
         'frotaCardValue' => 'float',
+        'instantPayment' => 'boolean',
     ];
 
     public function user(): BelongsTo
